@@ -19,5 +19,6 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible_local" do |ansible|
     install_mode = :default
     ansible.playbook = "playbook.yml"
+    ansible.galaxy_role_file = "requirements.yml"
   end
 end
