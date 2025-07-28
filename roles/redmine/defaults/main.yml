@@ -2,3 +2,4 @@
 # defaults file for roles/redmine
 redmine_file: https://www.redmine.org/releases/redmine-6.0.6.tar.gz
 redmine_dir: /var/www/redmine
+asdf_user: redmine

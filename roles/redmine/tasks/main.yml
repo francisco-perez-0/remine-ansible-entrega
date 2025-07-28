@@ -8,7 +8,24 @@
     group: "www-data"
     mode: '0755'
 
-- name: Download Redmine
+- name: Create asdf user
+  ansible.builtin.user:
+    name: "{{ asdf_user }}"
+    shell: /bin/bash
+    create_home: true
+    home: "/home/{{ asdf_user }}"
+    state: present
+
+- name: Install MySQL client development headers
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - build-essential
+    - libmysqlclient-dev
+
+- name: Download Redmine if not present
   ansible.builtin.unarchive:
     src: "{{ redmine_file }}"
     dest: "{{ redmine_dir }}"
@@ -16,34 +33,72 @@
     owner: "www-data"
     group: "www-data"
     mode: '0755'
+    creates: "{{ redmine_dir }}/public/index.html"
 
-- name: Set permissions for Redmine directory
+
+- name: Set ownership of Redmine directory to redmine
   ansible.builtin.file:
     path: "{{ redmine_dir }}"
     state: directory
-    owner: "www-data"
-    group: "www-data"
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
     recurse: true
 
-- name: Permissions to directory
+- name: Set proper permissions for Redmine files
   ansible.builtin.find:
-    paths:
-      - "{{ redmine_dir }}"
+    paths: "{{ redmine_dir }}/redmine-6.0.6"
+    file_type: file
   register: redmine_files
 
-- name: Set permissions for Redmine files
+- name: Set permissions for files
   ansible.builtin.file:
     path: "{{ item.path }}"
-    owner: "www-data"
-    group: "www-data"
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
     mode: '0644'
   loop: "{{ redmine_files.files }}"
+
+- name: Set proper permissions for Redmine directories
+  ansible.builtin.find:
+    paths: "{{ redmine_dir }}/redmine-6.0.6"
+    file_type: directory
+  register: redmine_dirs
+
+- name: Set permissions for directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
+    mode: '0755'
+  loop: "{{ redmine_dirs.files }}"
+
+- name: Add www-data to redmine group
+  ansible.builtin.user:
+    name: www-data
+    groups: redmine
+    append: true
 
 - name: Create .tool-versions
   ansible.builtin.copy:
     dest: "{{ redmine_dir }}/.tool-versions"
     content: |
       ruby 3.3.8
+    owner: "www-data"
+    group: "www-data"
+    mode: '0644'
+
+- name: Create database.yml
+  ansible.builtin.template:
+    src: "database.yml.j2"
+    dest: "{{ redmine_dir }}/redmine-6.0.6/config/database.yml"
+    owner: "www-data"
+    group: "www-data"
+    mode: '0644'
+
+- name: Create configuration.yml
+  ansible.builtin.template:
+    src: "configuration.yml.j2"
+    dest: "{{ redmine_dir }}/redmine-6.0.6/config/configuration.yml"
     owner: "www-data"
     group: "www-data"
     mode: '0644'
