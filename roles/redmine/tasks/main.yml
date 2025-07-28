@@ -1,0 +1,49 @@
+---
+# tasks file for roles/redmine
+- name: Create Redmine directory
+  ansible.builtin.file:
+    path: "{{ redmine_dir }}"
+    state: directory
+    owner: "www-data" # Capaz debe ser www-data y agregar a redmine al grupo
+    group: "www-data"
+    mode: '0755'
+
+- name: Download Redmine
+  ansible.builtin.unarchive:
+    src: "{{ redmine_file }}"
+    dest: "{{ redmine_dir }}"
+    remote_src: true
+    owner: "www-data"
+    group: "www-data"
+    mode: '0755'
+
+- name: Set permissions for Redmine directory
+  ansible.builtin.file:
+    path: "{{ redmine_dir }}"
+    state: directory
+    owner: "www-data"
+    group: "www-data"
+    recurse: true
+
+- name: Permissions to directory
+  ansible.builtin.find:
+    paths:
+      - "{{ redmine_dir }}"
+  register: redmine_files
+
+- name: Set permissions for Redmine files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "www-data"
+    group: "www-data"
+    mode: '0644'
+  loop: "{{ redmine_files.files }}"
+
+- name: Create .tool-versions
+  ansible.builtin.copy:
+    dest: "{{ redmine_dir }}/.tool-versions"
+    content: |
+      ruby 3.3.8
+    owner: "www-data"
+    group: "www-data"
+    mode: '0644'

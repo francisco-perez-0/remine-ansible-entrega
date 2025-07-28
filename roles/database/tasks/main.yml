@@ -1,0 +1,25 @@
+---
+# tasks file for roles/database
+- name: Install MySQL server
+  ansible.builtin.package:
+    name: mysql-server
+    state: present
+  become: true
+
+- name: Create MySQL database
+  community.mysql.mysql_db:
+    name: "{{ database_name }}"
+    state: present
+    encoding: "{{ database_charset }}"
+    collation: "{{ database_charset }}_general_ci"
+    login_user: "root"
+    login_password: "{{ mysql_root_password }}"
+  become: true
+
+- name: Create MySQL user
+  community.mysql.mysql_user:
+    name: "{{ database_user }}"
+    password: "{{ database_password }}"
+    priv: "{{ database_name }}.*:ALL"
+    host: "{{ database_host }}"
+    state: present

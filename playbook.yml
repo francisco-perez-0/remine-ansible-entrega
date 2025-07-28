@@ -1,0 +1,6 @@
+- name: Instalar Redmine
+  hosts: all
+  become: true
+  roles:
+    - role: redmine
+    - role: asdf_ruby

@@ -1,0 +1,21 @@
+---
+asdf_user: redmine
+asdf_dir: "/home/{{ asdf_user }}/.asdf"
+asdf_version: "v0.18.0"
+redmine_dir: /var/www/redmine
+asdf_plugins:
+  - name: ruby
+  - version: "3.3.8"
+
+ruby_dependencies:
+  - libssl-dev
+  - libreadline-dev
+  - zlib1g-dev
+  - autoconf
+  - bison
+  - build-essential
+  - libyaml-dev
+  - libffi-dev
+  - libgdbm-dev
+  - libncurses5-dev
+  - libgmp-dev

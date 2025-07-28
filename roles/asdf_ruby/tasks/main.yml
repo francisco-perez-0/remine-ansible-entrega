@@ -1,0 +1,89 @@
+---
+# tasks file for roles/asdf_ruby
+
+- name: Install git
+  ansible.builtin.package:
+    name: git
+    state: present
+
+- name: Create asdf user
+  ansible.builtin.user:
+    name: "{{ asdf_user }}"
+    shell: /bin/bash
+    create_home: true
+    home: "/home/{{ asdf_user }}"
+    state: present
+
+- name: Add redmine user to www-data group
+  ansible.builtin.user:
+    name: "{{ asdf_user }}"
+    append: true
+    group: www-data
+
+- name: Clone asdf repository
+  ansible.builtin.git:
+    repo: 'https://github.com/asdf-vm/asdf.git'
+    dest: /home/{{ asdf_user }}/.asdf
+    version: v0.14.0
+    update: false
+
+- name: Add asdf conf to .bashrc
+  ansible.builtin.blockinfile:
+    path: /home/{{ asdf_user }}/.bashrc
+    block: |
+      # asdf configuration
+      . "/home/{{ asdf_user }}/.asdf/asdf.sh"
+    create: true
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
+    mode: '0644'
+
+- name: Ensure permissions for asdf directory
+  ansible.builtin.file:
+    path: /home/{{ asdf_user }}/.asdf
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
+    recurse: true
+
+- name: Install ruby dependencies
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ruby_dependencies }}"
+  become: true
+
+- name: Checkear que ruby este instalado
+  ansible.builtin.shell: |
+      export ASDF_DIR={{ asdf_dir }}
+      . "$ASDF_DIR/asdf.sh"
+      asdf list ruby
+  register: ruby_installed
+  changed_when: false
+  become: true
+  become_user: "{{ asdf_user }}"
+  become_method: ansible.builtin.sudo
+  failed_when: false
+
+- name: Agregar plugin de Ruby si no esta instalado
+  ansible.builtin.shell: | # noqa command-instead-of-module |
+      export ASDF_DIR={{ asdf_dir }}
+      . "$ASDF_DIR/asdf.sh"
+      asdf plugin add ruby
+      asdf plugin list-all ruby
+      asdf install ruby 3.3.8 --keep-download
+  when: ruby_installed.rc != 0
+  changed_when: false
+  become: true
+  become_user: "{{ asdf_user }}"
+  become_method: ansible.builtin.sudo
+
+- name: Install bundler gem
+  ansible.builtin.shell: |
+      export ASDF_DIR={{ asdf_dir }}
+      . "$ASDF_DIR/asdf.sh"
+      cd {{ redmine_dir }}/redmine-6.0.6
+      asdf exec gem list -i bundler || asdf exec gem install bundler
+  become: true
+  become_user: "{{ asdf_user }}"
+  become_method: ansible.builtin.sudo
+  changed_when: false
