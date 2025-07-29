@@ -1,0 +1,41 @@
+upstream myapp {
+  server unix:///var/run/redmine/redmine.sock;
+}
+
+server {
+  listen 80;
+  #listen [::]:80;
+  server_name _;
+
+  root /var/www/html/redmine-6.0.6/public;
+  access_log /var/log/redmine.access.log;
+  error_log /var/log/redmine.error.log info;
+
+  if (-f $document_root/maintenance.html) {
+    rewrite  ^(.*)$  /maintenance.html last;
+    break;
+  }
+
+  location / {
+    try_files $uri @app;
+    #autoindex on;
+  }
+
+
+  location @app {
+    proxy_pass http://myapp;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_redirect off;
+  }
+
+  location ~* \.(ico|css|gif|jpe?g|png|js)(\?[0-9]+)?$ {
+     expires max;
+     break;
+  }
+
+  location = /500.html {
+    root /var/www/html/redmine-6.0.6/public;
+  }
+}

@@ -132,3 +132,83 @@
     owner: "{{ asdf_user }}"
     group: "{{ asdf_user }}"
     mode: '0644'
+
+- name: Migrate DB
+  ansible.builtin.shell: |
+    export ASDF_DIR={{ asdf_dir }}
+    . "$ASDF_DIR/asdf.sh"
+    cd {{ redmine_dir }}/redmine-6.0.6
+    asdf exec bundle exec rake db:migrate RAILS_ENV=production
+  become: true
+  become_user: "{{ asdf_user }}"
+  become_method: ansible.builtin.sudo
+  changed_when: false
+
+- name: Precompile assets
+  ansible.builtin.shell: |
+    export ASDF_DIR={{ asdf_dir }}
+    . "$ASDF_DIR/asdf.sh"
+    cd {{ redmine_dir }}/redmine-6.0.6
+    asdf exec bundle exec rake assets:precompile RAILS_ENV=production
+  become: true
+  become_user: "{{ asdf_user }}"
+  become_method: ansible.builtin.sudo
+  changed_when: false
+
+- name: Find public files
+  ansible.builtin.find:
+    paths: "{{ redmine_dir }}/redmine-6.0.6/public"
+    file_type: file
+  register: public_files
+
+- name: Set permissions for public files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0644'
+  loop: "{{ public_files.files }}"
+
+- name: Put puma.rb configuration
+  ansible.builtin.copy:
+    src: "puma.rb"
+    dest: "{{ redmine_dir }}/redmine-6.0.6/config/puma.rb"
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
+    mode: '0644'
+  become: true
+
+- name: Create puma daemon service
+  ansible.builtin.template:
+    src: "puma-daemon.service.j2"
+    dest: "/etc/systemd/system/puma-daemon.service"
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_user }}"
+    mode: '0755'
+  become: true
+
+- name: Enable and start puma daemon service
+  ansible.builtin.systemd:
+    name: puma-daemon.service
+    state: started
+    enabled: true
+  become: true
+
+# - name: Create var/run/redmine directory
+#   ansible.builtin.file:
+#     path: /var/run/redmine
+#     state: directory
+#     owner: "{{ asdf_user }}"
+#     group: "{{ asdf_user }}"
+#     mode: '0755'
+#
+# - name: Exec server
+#   ansible.builtin.shell: |
+#     export ASDF_DIR={{ asdf_dir }}
+#     . "$ASDF_DIR/asdf.sh"
+#     cd {{ redmine_dir }}/redmine-6.0.6
+#     asdf exec bundle exec puma -C config/puma.rb -e production
+#   async: 10
+#   poll: 0
+#   become: true
+#   become_user: "{{ asdf_user }}"
+#   become_method: ansible.builtin.sudo
+#   changed_when: false

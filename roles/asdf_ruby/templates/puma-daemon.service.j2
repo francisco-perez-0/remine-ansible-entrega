@@ -1,0 +1,18 @@
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+User=redmine
+Group=www-data
+Type=notify
+WatchdogSec=10
+WorkingDirectory={{ redmine_dir }}/redmine-6.0.6
+Environment=PUMA_DEBUG=1
+Environment=RAILS_ENV=production
+RuntimeDirectory=redmine
+RuntimeDirectoryMode=0755
+ExecStart={{ asdf_dir }}/asdf.sh bundle exec puma -C {{ redmine_dir }}/redmine-6.0.6/config/puma.rb
+
+[Install]
+WantedBy=multi-user.target
