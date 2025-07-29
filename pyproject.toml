@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "redmine-ansible-entrega"
+version = "0.1.0"
+description = ""
+authors = ["Francisco Perez <francisco.perez@alu.ing.unlp.edu.ar>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.3"
+ansible = "2.16.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
