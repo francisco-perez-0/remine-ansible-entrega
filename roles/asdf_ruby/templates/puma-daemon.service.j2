@@ -12,7 +12,7 @@ Environment=PUMA_DEBUG=1
 Environment=RAILS_ENV=production
 RuntimeDirectory=redmine
 RuntimeDirectoryMode=0755
-ExecStart={{ asdf_dir }}/asdf.sh bundle exec puma -C {{ redmine_dir }}/redmine-6.0.6/config/puma.rb
+ExecStart=/bin/bash -c 'source {{ asdf_dir }}/asdf.sh && bundle exec puma -C {{ redmine_dir }}/redmine-6.0.6/config/puma.rb'
 
 [Install]
 WantedBy=multi-user.target

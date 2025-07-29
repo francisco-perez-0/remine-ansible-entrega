@@ -17,3 +17,4 @@
             password: "{{ db_password }}"
             priv: "{{ db_name }}.*:ALL"
     - role: asdf_ruby
+    - role: nginx
