@@ -6,9 +6,10 @@ Vagrant.configure("2") do |config|
       v.memory = 2048
   end
 
-  config.vm.network "forwarded_port",
-    guest: 80, host: 8888, host_ip: "127.0.0.1"
-
+  #config.vm.network "forwarded_port",
+  #  guest: 80, host: 8888, host_ip: "127.0.0.1"
+  
+  config.vm.network "public_network"
   #config.vm.provision "shell", inline: "ansible-galaxy install bbatsche.mysql"
 
   config.vm.provision "shell", inline: <<-SHELL
