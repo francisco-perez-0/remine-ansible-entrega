@@ -59,7 +59,7 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"]
+  owners = ["099720109477"] #limita a busqueda oficiales - ID oficial AWS
 }
 
 resource "aws_instance" "redmine" {
@@ -112,6 +112,7 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
+#asocia la table de rutas a la subred
 resource "aws_route_table_association" "public_rt_assoc" {
   subnet_id      = aws_subnet.main_subnet.id
   route_table_id = aws_route_table.public_rt.id
