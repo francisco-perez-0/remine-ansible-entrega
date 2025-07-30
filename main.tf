@@ -44,6 +44,16 @@ resource "aws_vpc_security_group_egress_rule" "all_egress" {
   description       = "Allow all outbound traffic"
 }
 
+# Regla adicional para permitir conexión a RDS desde EC2
+resource "aws_vpc_security_group_ingress_rule" "mysql_ingress" {
+  security_group_id = aws_security_group.redmine_sg.id
+  cidr_ipv4         = "10.0.0.0/16"
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  description       = "Allow MySQL access from VPC"
+}
+
 # 3. Instancia EC2 con Ubuntu
 
 data "aws_ami" "ubuntu" {
@@ -91,8 +101,47 @@ resource "aws_subnet" "main_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
   tags = {
-    Name = "redmine-subnet"
+    Name = "redmine-public-subnet"
+  }
+}
+
+# Crear subred privada para RDS
+resource "aws_subnet" "private_subnet_uno" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "redmine-private-subnet-a"
+  }
+}
+
+# Crear subred privada para RDS
+resource "aws_subnet" "private_subnet_dos" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "us-east-1c"
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "redmine-private-subnet-b"
+  }
+}
+
+# Elastic IP para NAT Gateway
+resource "aws_eip" "nat" {
+  domain = "vpc"
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# NAT Gateway para la subred privada
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.main_subnet.id
+
+  tags = {
+    Name = "redmine-nat-gateway"
   }
 }
 
@@ -102,7 +151,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 }
 
-#Route table con internet
+#Route table con internet (publica)
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main.id
 
@@ -110,11 +159,35 @@ resource "aws_route_table" "public_rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
+
+  tags = {
+    Name = "redmine-public-rt"
+  }
 }
 
-#asocia la table de rutas a la subred
+# Route table privada (para RDS)
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
+
+  tags = {
+    Name = "redmine-private-rt"
+  }
+}
+
+#asocia la table de rutas a la subred pública
 resource "aws_route_table_association" "public_rt_assoc" {
   subnet_id      = aws_subnet.main_subnet.id
   route_table_id = aws_route_table.public_rt.id
+}
+
+#asocia la table de rutas a la subred privada
+resource "aws_route_table_association" "private_rt_assoc" {
+  subnet_id      = aws_subnet.private_subnet_uno.id
+  route_table_id = aws_route_table.private_rt.id
 }
 

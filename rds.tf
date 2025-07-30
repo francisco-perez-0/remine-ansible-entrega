@@ -1,6 +1,5 @@
 resource "aws_db_subnet_group" "redmine" {
-  name       = "redmine-db-subnet-group"
-  subnet_ids = var.subnet_ids
+  subnet_ids = [aws_subnet.private_subnet_uno.id, aws_subnet.private_subnet_dos.id]
 
   tags = {
     Name = "Redmine DB subnet group"
@@ -10,7 +9,7 @@ resource "aws_db_subnet_group" "redmine" {
 resource "aws_security_group" "rds_sg" {
   name        = "rds_redmine_sg"
   description = "Allow MySQL access from EC2"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = var.db_port
