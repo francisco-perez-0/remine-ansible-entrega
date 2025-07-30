@@ -5,16 +5,16 @@
     - vault/redmine_secrets.yml
   roles:
     - role: redmine
-    - role: geerlingguy.mysql
-      vars:
-        mysql_root_password: "{{ db_password }}"
-        mysql_databases:
-          - name: "{{ db_name }}"
-            encoding: "{{ db_charset }}"
-            collation: "{{ db_charset }}_general_ci"
-        mysql_users:
-          - name: "{{ db_user }}"
-            password: "{{ db_password }}"
-            priv: "{{ db_name }}.*:ALL"
+    #- role: geerlingguy.mysql
+    #  vars:
+    #    mysql_root_password: "{{ db_password }}"
+    #    mysql_databases:
+    #      - name: "{{ db_name }}"
+    #        encoding: "{{ db_charset }}"
+    #        collation: "{{ db_charset }}_general_ci"
+    #    mysql_users:
+    #      - name: "{{ db_user }}"
+    #        password: "{{ db_password }}"
+    #        priv: "{{ db_name }}.*:ALL"
     - role: asdf_ruby
     - role: nginx
