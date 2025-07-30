@@ -46,7 +46,7 @@
   register: ruby_installed
   changed_when: false
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   failed_when: false
 
@@ -60,7 +60,7 @@
   when: ruby_installed.rc != 0
   changed_when: false
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
 
 - name: Install bundler gem
@@ -70,7 +70,7 @@
       cd {{ redmine_dir }}/redmine-6.0.6
       asdf exec gem list -i bundler || asdf exec gem install bundler
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
@@ -81,7 +81,7 @@
     cd {{ redmine_dir }}/redmine-6.0.6
     asdf exec bundle config set --without 'development test'
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
@@ -103,7 +103,7 @@
     cd {{ redmine_dir }}/redmine-6.0.6
     asdf exec bundle install
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
@@ -116,7 +116,7 @@
     chdir: "{{ redmine_dir }}/redmine-6.0.6"
   become: true
   register: secret_key_result
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
@@ -140,7 +140,7 @@
     cd {{ redmine_dir }}/redmine-6.0.6
     asdf exec bundle exec rake db:migrate RAILS_ENV=production
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
@@ -151,7 +151,7 @@
     cd {{ redmine_dir }}/redmine-6.0.6
     asdf exec bundle exec rake assets:precompile RAILS_ENV=production
   become: true
-  become_user: "{{ asdf_user }}"
+  #become_user: "{{ asdf_user }}"
   become_method: ansible.builtin.sudo
   changed_when: false
 
