@@ -13,8 +13,19 @@
   become: true
 
 - name: Create Nginx configuration for Redmine
-  ansible.builtin.copy:
-    src: redmine
+  ansible.builtin.template:
+    src: redmine.j2
     dest: /etc/nginx/sites-available/redmine
     mode: '0744'
   notify: Reiniciar Nginx
+
+- name: Debug
+  ansible.builtin.debug:
+    var: redmine_dir
+
+- name: Enable Redmine Nginx site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/redmine
+    dest: /etc/nginx/sites-enabled/redmine
+    state: link
+  become: true
