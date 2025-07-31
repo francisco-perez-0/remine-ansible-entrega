@@ -7,6 +7,8 @@ Proyecto completo para desplegar Redmine en AWS usando Ansible para aprovisionam
 - [Descripción del Proyecto](#descripción-del-proyecto)
 - [Arquitectura](#arquitectura)
 - [Estructura del Proyecto](#estructura-del-proyecto)
+- [Recursos creados en AWS](#recursos-aws)
+- [Estado de la infraestructura creada](#infra-aws)
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
 - [Uso](#uso)
@@ -75,6 +77,81 @@ redmine-ansible-entrega/
 ├── 📄 inventory.ini                   # Inventario de hosts
 └── 📄 README.md                       # Este archivo
 ```
+## 📦 Recursos creados en AWS
+
+### 🔧 Red y conectividad (Networking)
+
+| Recurso                      | Descripción                                                                 |
+|------------------------------|-----------------------------------------------------------------------------|
+| `aws_vpc`                    | Red privada virtual que contiene todos los recursos                        |
+| `aws_subnet`                 | Subnet pública (EC2) y privada (RDS) dentro de la VPC                       |
+| `aws_internet_gateway`       | Permite acceso a Internet desde la VPC (usado por la EC2)                   |
+| `aws_route_table`            | Define rutas para permitir tráfico desde/hacia Internet                     |
+| `aws_route_table_association`| Asocia subnets con las tablas de ruteo                                     |
+
+#### 🔐 Seguridad
+
+| Recurso               | Descripción                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| `aws_security_group`   | Controla acceso a EC2 (puertos 22 y 80) y a RDS (puerto 3306)               |
+| `aws_key_pair`         | Par de claves SSH para acceder a la instancia EC2                          |
+
+#### 🖥️ Cómputo
+
+| Recurso             | Descripción                                                               |
+|----------------------|---------------------------------------------------------------------------|
+| `aws_instance`       | Instancia EC2 Ubuntu con Redmine, Nginx y Puma                           |
+
+#### 🗄️ Base de datos
+
+| Recurso               | Descripción                                                             |
+|------------------------|-------------------------------------------------------------------------|
+| `aws_db_subnet_group` | Agrupa subnets privadas para alojar la base de datos RDS                |
+| `aws_db_instance`     | Instancia de base de datos MySQL (RDS) para Redmine                     |
+
+## Estado de la infraestructura creada
+
+                    ╔════════════════════════════════════╗
+                    ║         Internet (Usuario)         ║
+                    ╚════════════════════════════════════╝
+                                      │
+                                      ▼
+                        ╔══════════════════════════════╗
+                        ║   Internet Gateway (IGW)     ║
+                        ╚══════════════════════════════╝
+                                      │
+                                      ▼
+                             ╔════════════════╗
+                             ║    VPC (CIDR)  ║
+                             ║ redmine-vpc    ║
+                             ╚════════════════╝
+                              │             │
+                 ┌────────────┘             └────────────┐
+                 ▼                                       ▼
+        ╔═════════════════════════════╗           ╔═════════════════════════════╗
+        ║ Subnet pública              ║           ║ Subnet privada              ║
+        ║ (redmine-public-subnet)     ║           ║ (redmine-private-subnet)    ║
+        ║ - EC2 (Ubuntu)              ║           ║ - RDS (MySQL)               ║
+        ║ - Security Group:           ║           ║ - Security Group:           ║
+        ║   - SSH (22) desde 0.0.0.0  ║           ║   - MySQL (3306) desde EC2  ║
+        ║   - HTTP (80) desde 0.0.0.0 ║           ║                             ║
+        ╚═════════════════════════════╝           ╚═════════════════════════════╝
+                 │                                         ▲
+                 │ SSH/HTTP                                │ Conexión MySQL (3306)
+                 ▼                                         │
+        ╔═════════════════════════════════════╗            │
+        ║ EC2 (Redmine + Nginx + Puma)        ║◄───────────┘
+        ║ - IP pública                        ║
+        ║ - Usa output para conectar a RDS    ║
+        ║ - Usa Ansible + Vault               ║
+        ╚═════════════════════════════════════╝
+
+                    ┌─────────────────────────────────────────────┐
+                    │ Outputs desde Terraform:                    │
+                    │ - ec2_public_ip                             │
+                    │ - rds_endpoint                              │
+                    └─────────────────────────────────────────────┘
+
 
 ## 🔧 Requisitos
 
