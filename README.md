@@ -31,17 +31,17 @@ Este proyecto implementa la instalación automatizada de Redmine en AWS con las 
 ┌─────────────────────────────────────┐
 │           EC2 Instance              │
 ├─────────────────────────────────────┤
-│  Nginx (Proxy Reverso) :80         │
+│  Nginx (Proxy Reverso) :80          │
 ├─────────────────────────────────────┤
-│  Redmine + Puma :3000              │
+│  Redmine + Puma : (Socket UNIX)     │
 ├─────────────────────────────────────┤
-│  Ruby 3.3.8 (asdf)                 │
+│  Ruby 3.3.8 (asdf)                  │
 └─────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────┐
 │           AWS RDS MySQL             │
-│        (Base de Datos)             │
+│        (Base de Datos)              │
 └─────────────────────────────────────┘
 ```
 
