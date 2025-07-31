@@ -1,7 +1,7 @@
-## Redmine Deployment con Ansible y Vagrant
+# 🚀 Redmine Deployment con Ansible y Vagrant
 Proyecto para desplegar Redmine usando Ansible para aprovisionar una maquina virtual con Vagrant
 
-## Descripcion del proyecto
+## 🎯 Descripcion del proyecto
 
 Este proyecto implementa la instalación automatizada de Redmine con las siguientes características:
 
@@ -11,7 +11,7 @@ Este proyecto implementa la instalación automatizada de Redmine con las siguien
 - ✅ Base de datos: Local en la VM con MySQL 8.0
 - ✅ Aprovisionamiento automatizado: Ansible para configuración de la aplicación
 
-## Arquitectura
+## 🏗️ Arquitectura
 ```
 ┌─────────────────────────────────────┐
 │           VM local                  │ 
@@ -27,14 +27,14 @@ Este proyecto implementa la instalación automatizada de Redmine con las siguien
 └─────────────────────────────────────┘
 ```
 
-## Requisitos 
+## 🔧 Requisitos 
 
 ### Software requerido
 - Ansible >= 2.9
 - Python >= 3.8
 - Vagrant >= 2.4
 
-## Instalacion
+## 🚀 Instalacion
 
 ### 1. Clonar repositorio
 
@@ -68,7 +68,7 @@ Ingresar a http://**ip-vm**
 
 Deberias poder utilizar la aplicacion Redmine
 
-## Configuracion
+## ⚙️ Configuracion
 
 ### Variables de entorno
 
